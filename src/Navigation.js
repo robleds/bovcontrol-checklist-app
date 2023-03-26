@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import {
-  Button,
-  Text,
   StatusBar,
   useColorScheme,
 } from 'react-native';
@@ -18,6 +16,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // Screen Class Component Imports
 import LaunchSetupScreen from './components/launch-setup-screen/LaunchSetupScreen';
 import MainCheckListScreen from './components/main-check-list-screen/MainCheckListScreen';
+import AddCheckListScreen from './components/add-check-list-screen/AddCheckListScreen';
+import EditCheckListScreen from './components/edit-check-list-screen/EditCheckListScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +42,8 @@ const Navigation = () => {
                 <Stack.Navigator initialRouteName="LaunchSetup">
                     <Stack.Screen name="LaunchSetup" component={LaunchSetupScreen} options={{title: 'Welcome'}} />
                     <Stack.Screen name="MainCheckList" component={MainCheckListScreen} options={{title: 'Check-Lists'}} />
+                    <Stack.Screen name="AddCheckList" component={AddCheckListScreen} options={{title: 'Adicionar'}} />
+                    <Stack.Screen name="EditCheckList" component={EditCheckListScreen} options={{title: 'Editar'}} />
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaViewStyled>
