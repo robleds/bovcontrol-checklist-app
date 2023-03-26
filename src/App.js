@@ -15,8 +15,8 @@
 
 import React, {useEffect} from 'react';
 import Navigation from './Navigation';
-import RemoteConnection from './RemoteConnection';
 import {RealmContext} from './database/RealmConfig';
+import RemoteConnection from './api/RemoteConnection';
 
 // Inicialize main application
 const App = () => {
@@ -31,8 +31,9 @@ const App = () => {
   
   return (
     <RealmProvider>
+      <RemoteConnection>
         <Navigation />
-        <RemoteConnection />
+      </RemoteConnection>
     </RealmProvider>
   );
 };
