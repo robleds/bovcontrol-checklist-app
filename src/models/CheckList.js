@@ -5,7 +5,7 @@ export class CheckList extends Realm.Object {
     name: 'CheckList',
     primaryKey: '_id',
     properties: {
-        _id: 'int',
+        _id: 'string',
         type: "string",
         amount_of_milk_produced: "string", // must to be number
         farmer: 'Farmer?',

@@ -1,14 +1,7 @@
 import React, { useEffect } from 'react';
-import {
-  StatusBar,
-  useColorScheme,
-  Button
-} from 'react-native';
+import { StatusBar, useColorScheme } from 'react-native';
 import SafeAreaViewStyled from './components/utils/safe-area-view/SafeAreaViewStyled'
 import ActivityIndicatorStyled from './components/utils/activity-indicator/ActivityIndicatorStyled';
-
-// Database Realm dependencies
-import { RealmContext } from './database/RealmConfig';
 
 // Navigation dependencies 
 import { NavigationContainer } from '@react-navigation/native';
@@ -27,13 +20,11 @@ const Navigation = () => {
 
 
     const isDarkMode = useColorScheme() === 'dark';
-    const {useRealm, useObject, useQuery} = RealmContext;
-    const realm = useRealm();
     
     useEffect(() => {
 
         console.log("Navigation inicialized");
-      
+
     }, []);
   
     return (
