@@ -1,25 +1,31 @@
 import React from 'react';
-import {
-    Button,
-    Text,
-  } from 'react-native';
+import { ScrollView } from 'react-native';
+import { Button, Text } from "@react-native-material/core";
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import CheckListBoard from './CheckListBoard';
+import WidgetsBoard from './WidgetsBoard';
 
-const MainCheckListScreen = ({navigation, route}) => {
-    return <>
-      <Text>Data app is {route.params.status}</Text>
-      <Button
-            title="ADICIONAR"
-            onPress={() =>
-                navigation.navigate('AddCheckList', {status: 'Jane'})
-            }
-        />
-      <Button
-            title="EDITAR"
-            onPress={() =>
-                navigation.navigate('EditCheckList', {status: 'Bruce'})
-            }
-        />
-    </>;
+const MainCheckListScreen = (props) => {
+
+    React.useEffect(() => {
+        props.navigation.setOptions({
+            headerRight: () => (
+                <Button
+                    variant="outlined"
+                    title="Novo"
+                    onPress={() => props.navigation.navigate('AddCheckList', { status: 'Jane' })}
+                    trailing={props => <Icon name="add-circle" size={30} />}
+                />
+            ),
+        });
+    }, []);
+
+    return (
+        <ScrollView>
+            <WidgetsBoard />
+            <CheckListBoard {...props} />
+        </ScrollView>
+    )
 };
 
 export default MainCheckListScreen;
