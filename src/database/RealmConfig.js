@@ -6,7 +6,8 @@ import {From} from './../models/From'
 import {To} from './../models/To'
 import {Location} from './../models/Location'
 import {Untracked} from './../models/Untracked'
+import {LogProd} from './../models/LogProd'
 
 export const RealmContext = createRealmContext({
-  schema: [Untracked,CheckList,Farmer,From,To,Location],
+  schema: [Untracked,CheckList,Farmer,From,To,Location,LogProd],
 });

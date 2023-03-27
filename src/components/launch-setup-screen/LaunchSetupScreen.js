@@ -59,8 +59,9 @@ const LaunchSetupScreen = ({ navigation }) => {
         //     realm.delete(realm.objects('Untracked')[0]);
         // });
 
-        console.log("[Data Base: CheckList]", realm.objects('CheckList').length);
-        console.log("[Data Base: Untracked]", realm.objects('Untracked').length);
+        console.log("[LaunchSetupScreen: CheckList]", realm.objects('CheckList').length);
+        console.log("[LaunchSetupScreen: Untracked]", realm.objects('Untracked').length);
+        console.log("[LaunchSetupScreen: Logs]", realm.objects('LogProd').length);
 
         navigation.dispatch(
             StackActions.replace('MainCheckList', {
