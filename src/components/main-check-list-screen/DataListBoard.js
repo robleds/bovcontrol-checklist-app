@@ -2,7 +2,7 @@ import React from "react";
 import { ListItem, Stack, Text } from "@react-native-material/core";
 import styled from 'styled-components/native';
 
-const CheckListBoard = (props) => {
+const DataListBoard = (props) => {
 
     const TextComponent = styled(Text)`
     `;
@@ -23,4 +23,4 @@ const CheckListBoard = (props) => {
     )
 };
 
-export default CheckListBoard;
+export default DataListBoard;

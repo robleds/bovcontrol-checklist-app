@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 import { Button, Text } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import CheckListBoard from './CheckListBoard';
+import CheckListBoard from './DataListBoard';
 import WidgetsBoard from './WidgetsBoard';
 
 const MainCheckListScreen = (props) => {
