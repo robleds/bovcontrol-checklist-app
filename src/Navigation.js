@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import {
   StatusBar,
   useColorScheme,
+  Button
 } from 'react-native';
-import SafeAreaViewStyled from './components/safe-area-view/SafeAreaViewStyled'
-import ActivityIndicatorStyled from './components/activity-indicator/ActivityIndicatorStyled';
+import SafeAreaViewStyled from './components/utils/safe-area-view/SafeAreaViewStyled'
+import ActivityIndicatorStyled from './components/utils/activity-indicator/ActivityIndicatorStyled';
 
 // Database Realm dependencies
 import { RealmContext } from './database/RealmConfig';
@@ -17,6 +18,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LaunchSetupScreen from './components/launch-setup-screen/LaunchSetupScreen';
 import MainCheckListScreen from './components/main-check-list-screen/MainCheckListScreen';
 import AddCheckListScreen from './components/add-check-list-screen/AddCheckListScreen';
+import DetailCheckListScreen from './components/detail-check-list-screen/DetailCheckListScreen';
 import EditCheckListScreen from './components/edit-check-list-screen/EditCheckListScreen';
 
 const Stack = createNativeStackNavigator();
@@ -43,6 +45,7 @@ const Navigation = () => {
                     <Stack.Screen name="LaunchSetup" component={LaunchSetupScreen} options={{title: 'Welcome'}} />
                     <Stack.Screen name="MainCheckList" component={MainCheckListScreen} options={{title: 'Check-Lists'}} />
                     <Stack.Screen name="AddCheckList" component={AddCheckListScreen} options={{title: 'Adicionar'}} />
+                    <Stack.Screen name="DetailCheckList" component={DetailCheckListScreen} options={{title: 'Detalhes'}} />
                     <Stack.Screen name="EditCheckList" component={EditCheckListScreen} options={{title: 'Editar'}} />
                 </Stack.Navigator>
             </NavigationContainer>
