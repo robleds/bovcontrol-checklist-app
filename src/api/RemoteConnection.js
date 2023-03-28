@@ -32,31 +32,30 @@ export const RemoteConnectionProvider = (props) => {
   // TODO: refactor to joint ites before send to api
   // Sycronize remote API with offline data
   const syncUntrackedData = async () => {
+    
     let simpleCounter = 0;
     const untrackedData = realm.objects('Untracked');
-    for (const change of untrackedData) {
-      const realmObject = realm.objectForPrimaryKey('CheckList', change.children)
-      try {
-        switch (change.operation) {
-          case 'create':
-            await saveToApi(realmObject);
-            simpleCounter++;
-            realm.write(() => { realm.delete(change); });
-            break;
-          // case 'update':
-          //   await axios.put(`${url}/${change.id}`, JSON.parse(realmObject));
-          //   break;
-          // case 'delete':
-          //   await axios.delete(`${url}/${change.id}`);
-          //   break;
-          default:
-            // console.log(`Operação inválida: ${change.operation}`);
-        }
-      } catch (error) {
-        console.log(`[RemoteConnection] Erro ao sincronizar alteração offline: ${error}`);
+
+    const promises = untrackedData.map(async (element) => {
+      switch (element.operation) {
+
+        case 'create':
+          const realmObject = realm.objectForPrimaryKey('CheckList', element.children_id)
+          await saveToApi(realmObject);
+          simpleCounter++;
+          await realm.write(async () => { await realm.delete(element); });
+        break;
+
+        default:
+          console.log(`Operação inválida: ${element.operation}`);
+        break;
+
       }
-    }
-    // console.log(`[RemoteConnection] UPLOAD ${simpleCounter} itens successfully.`);
+    });
+  
+    await Promise.all(promises);
+
+    console.log(`[RemoteConnection] UPLOAD ${simpleCounter} itens successfully.`);
   };
 
   // Download API Data List
@@ -68,7 +67,7 @@ export const RemoteConnectionProvider = (props) => {
     } catch (error) {
       console.log("[RemoteConnection]", error)
     }
-    // console.log(`[RemoteConnection] DOWNLOAD ${fetchedData.length} itens successfully.`);
+    console.log(`[RemoteConnection] DOWNLOAD ${fetchedData.length} itens successfully.`);
     const saving = await saveToRealm(fetchedData);
     setRemoteListData(fetchedData);
   };
@@ -94,9 +93,9 @@ export const RemoteConnectionProvider = (props) => {
   }
 
   // Save data in API
-  async function saveToApi(modelObject) {
+  const saveToApi = async (modelObject) => {
     try {
-      await api.post('/checkList', {
+      const response = await api.post('/checkList', {
         "checklists": [
           {
             "_id": modelObject._id,
@@ -123,6 +122,7 @@ export const RemoteConnectionProvider = (props) => {
           }
         ]
       }, { headers: headers });
+      console.log('saveToApi >> _id:', response.data);
     } catch (error) {
       console.log("[RemoteConnection]", error)
     }
@@ -204,7 +204,7 @@ export const RemoteConnectionProvider = (props) => {
         }
       });
     });
-    // console.log(`[RemoteConnection] CREATED ${counterSaveSucess} new itens, EDITED ${counterEditSucess} existing successfully and ${counterSkipped} skipped.`);
+    console.log(`[RemoteConnection] CREATED ${counterSaveSucess} new itens, EDITED ${counterEditSucess} existing successfully and ${counterSkipped} skipped.`);
   }
 
   // Syncronize local database with remote API
@@ -243,7 +243,7 @@ export const RemoteConnectionProvider = (props) => {
       });
     });
 
-    // console.log(`[RemoteConnection] REMOVED ${counterSucess} itens successfully and ${counterSkipped} skipped.`);
+    console.log(`[RemoteConnection] REMOVED ${counterSucess} itens successfully and ${counterSkipped} skipped.`);
   };
 
   // Refresh Control
@@ -251,15 +251,6 @@ export const RemoteConnectionProvider = (props) => {
     await syncUntrackedData();
     await syncRemoteData();
   }
-
-  // verify when database update
-  realm.addListener('change', async (realm) => {
-    const modelObject = realm.objects('Untracked');
-    if (modelObject.length > 0) {
-      await syncUntrackedData();
-      await syncRemoteData();
-    }
-  });
 
   useEffect(() => {
 

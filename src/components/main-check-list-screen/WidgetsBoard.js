@@ -17,13 +17,12 @@ const WidgetsBoard = () => {
     const [totalChecklist, setFarm] = useState(null);
     const [totalUnsynced, setUnsynced] = useState(null);
 
-    useEffect(() => {
-
+    function refresh() {
         const results = realm.objects('CheckList');
 
         const quantityMilk = results.sum('amount_of_milk_produced').toLocaleString('pt-BR');
         setAmountOfMilkProduced(quantityMilk);
-        
+
         const quantityCow = results.sum('number_of_cows_head').toLocaleString('pt-BR');
         setNumberOfCowsHead(quantityCow);
 
@@ -34,8 +33,16 @@ const WidgetsBoard = () => {
         const resultsChecklists = realm.objects('CheckList');
         const quantityChecklist = resultsChecklists.length.toLocaleString('pt-BR');
         setFarm(quantityChecklist);
+    }
 
+    useEffect(() => {
+        refresh();
     }, []);
+
+    // verify when database update
+    realm.addListener('change', async (realm) => {
+        refresh();
+    });
 
     const windowWidth = Dimensions.get('window').width;
     const surfaceWidth = windowWidth / 2.2;

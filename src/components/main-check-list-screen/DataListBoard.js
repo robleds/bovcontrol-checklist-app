@@ -9,7 +9,7 @@ import { RealmContext } from './../../database/RealmConfig';
 
 const DataListBoard = (props) => {
 
-    const { useRealm, useObject, useQuery } = RealmContext;
+    const { useRealm } = RealmContext;
     const realm = useRealm();
     const realmPath = realm.path;
     const exists = Realm.exists({ path: realmPath });
@@ -29,6 +29,12 @@ const DataListBoard = (props) => {
 
     const BannerButton = styled(Button)`
     `;
+
+    // verify when database update
+    realm.addListener('change', async (realm) => {
+      const results = realm.objects('CheckList').sorted('updated_at', true);
+      setCheckListData(results);
+    });
 
     return (
         <Stack m={4} spacing={4}>

@@ -8,7 +8,8 @@ export class Untracked extends Realm.Object {
         _id: 'string',
         operation: "string",
         updated_at: "date",
-        children: 'string',
+        children_id: 'string',
+        children_data: 'CheckList?',
     }
   };
 }
