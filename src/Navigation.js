@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
 import SafeAreaViewStyled from './components/utils/safe-area-view/SafeAreaViewStyled'
-import ActivityIndicatorStyled from './components/utils/activity-indicator/ActivityIndicatorStyled';
 
 // Navigation dependencies 
 import { NavigationContainer } from '@react-navigation/native';
@@ -18,19 +17,17 @@ const Stack = createNativeStackNavigator();
 
 const Navigation = () => {
 
-
     const isDarkMode = useColorScheme() === 'dark';
     
     useEffect(() => {
 
-        console.log("Navigation inicialized");
+        console.log("[Navigation] inicialized");
 
     }, []);
   
     return (
         <SafeAreaViewStyled>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-            <ActivityIndicatorStyled visible />
             <NavigationContainer>
                 <Stack.Navigator initialRouteName="LaunchSetup">
                     <Stack.Screen name="LaunchSetup" component={LaunchSetupScreen} options={{title: 'Welcome'}} />

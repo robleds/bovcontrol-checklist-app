@@ -25,7 +25,7 @@ const App = () => {
 
   useEffect(() => {
 
-    console.log('App Inicialized');
+    console.log('[App] Inicialized');
 
   }, []);
   

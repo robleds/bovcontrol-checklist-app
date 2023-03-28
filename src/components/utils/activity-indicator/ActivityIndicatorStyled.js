@@ -13,11 +13,11 @@ const ActivityIndicatorComponent = styled(ActivityIndicator)`
   bottom: 0;
 `;
 
-const StyledActivityIndicator = (props) => {
+const ActivityIndicatorStyled = (props) => {
     const isVisible = !!props?.visible && props.visible===true;
     if (isVisible) {
         return isVisible ? (<ActivityIndicatorComponent size="large" />) : null;
     }
 }
 
-export default StyledActivityIndicator;
+export default ActivityIndicatorStyled;
