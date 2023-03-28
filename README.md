@@ -38,3 +38,13 @@ A partir disto a navegação é direcionada para tela `MainCheckListScreen.js` o
 - Na biblioteca Realm foi idetificado um bug no fucionamento do Debugger via browser, com isso só é possível debugar pelo termninal ou através de outros métodos. Para testar aaplicação não utilize o Debugger do browser.
 - Na API foi encontrado algumas inconsistências na estrutura dos dados; a tipagem de dados esperado para o campo `_id` para POST é `String` mas quando devolve GET a mesma propriedade vem do tipo `Number`. O mesmo ocorre de forma inversa com as propriedades `amount_of_milk_produced` e `number_of_cows_head` onde ambas sobem como `Number` e descem como `String`. Essas diferenças de tipo impactam nas formatações dos schemes do `Realm.Object` (e também se usar TypeScript) uma vez que a tipagem é requerida.
 - O id do registro em base não-relacional está com formato `Number` porém é uma boa prática nestes casos utilizar o tipo `String` no modo `UUID` para garantir segurança e impedir duplicidade.
+
+## Sincronization Flow
+
+O fluxo de sincronização dos dados está sendo gerido pelo componennte `api/RemoteConnection.js` (que precisa ser refatorada) onde há 3 métodos principais de monitoramento. O conceito do fluxo é assim: a prioridade são os registros que estão no aparelho (descincronizado) serem enviados para API; próximo passo é baixar tudo que está na API para comparar com a base local; para cocluir sincronizar a base local. 
+
+- `syncUntrackedData()` Esse método é resposável por fazer upload itens individualmete para API.
+- `syncRemoteData()` Esse método é responsável por fazer dowload da API para atualizar na base local (create/update).
+- `syncLocalData()` Esse método é responsável por sincronizar as bases local com remota e remover itens apagados (delete).
+
+Existem alguns "ToDo" no código com dívidas técnicas que vão melhorar a performace, em fluxos e arquitetura do sistema.
