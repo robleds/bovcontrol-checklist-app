@@ -4,6 +4,7 @@ import { Button, Text } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CheckListBoard from './DataListBoard';
 import WidgetsBoard from './WidgetsBoard';
+import styled from 'styled-components/native';
 
 // Database Realm dependencies
 import { RealmContext } from './../../database/RealmConfig';
@@ -16,27 +17,29 @@ const MainCheckListScreen = (props) => {
     const { useRealm, useObject, useQuery } = RealmContext;
     const realm = useRealm();
 
-    
     // Refresh control
     const { handlePushToRefresh } = React.useContext(RemoteConnectionContext);
     const [refreshing, setRefreshing] = React.useState(false);
     const onRefresh = React.useCallback(() => {
-      setRefreshing(true);
-      handlePushToRefresh();
-      setTimeout(() => {
-        setRefreshing(false);
-      }, 2000);
+        setRefreshing(true);
+        handlePushToRefresh();
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
     }, []);
+
+    const ButtonComponent = styled(Button)`
+        width: 100px;
+    `;
 
     React.useEffect(() => {
 
         props.navigation.setOptions({
             headerRight: () => (
-                <Button
-                    variant="outlined"
+                <ButtonComponent
                     title="Novo"
                     onPress={() => props.navigation.navigate('AddCheckList', { status: 'Jane' })}
-                    trailing={props => <Icon name="add-circle" size={30} />}
+                    trailing={props => <Icon name="add-circle" size={30} color={'white'} />}
                 />
             ),
         });

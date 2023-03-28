@@ -32,7 +32,7 @@ export const RemoteConnectionProvider = (props) => {
   // TODO: refactor to joint ites before send to api
   // Sycronize remote API with offline data
   const syncUntrackedData = async () => {
-    
+
     let simpleCounter = 0;
     const untrackedData = realm.objects('Untracked');
 
@@ -44,15 +44,15 @@ export const RemoteConnectionProvider = (props) => {
           await saveToApi(realmObject);
           simpleCounter++;
           await realm.write(async () => { await realm.delete(element); });
-        break;
+          break;
 
         default:
           console.log(`Operação inválida: ${element.operation}`);
-        break;
+          break;
 
       }
     });
-  
+
     await Promise.all(promises);
 
     console.log(`[RemoteConnection] UPLOAD ${simpleCounter} itens successfully.`);
@@ -227,24 +227,29 @@ export const RemoteConnectionProvider = (props) => {
       .concat(remoteIds.filter(subitem => !localIds.includes(subitem)));
 
     let counterSucess = 0;
-    let counterSkipped = 0;
 
-    realm.write(() => {
-
-      diffArray.forEach(id => {
-        try {
-          const itemToExclude = realm.objectForPrimaryKey('CheckList', id);
-          realm.delete(itemToExclude);
-          counterSucess++;
-        } catch (error) {
-          counterSkipped++;
-          console.log('[syncLocalData]', error);
-        }
-      });
+    const promises = diffArray.map(async (_id) => {
+      const result = await Delete({ _id });
+      counterSucess++
     });
 
-    console.log(`[RemoteConnection] REMOVED ${counterSucess} itens successfully and ${counterSkipped} skipped.`);
+    await Promise.all(promises);
+
+    console.log(`[RemoteConnection] REMOVED ${counterSucess} itens successfully.`);
   };
+
+  const Delete = async ({ _id }) => {
+    try {
+      // remove from database
+      const itemToExclude = realm.objectForPrimaryKey('CheckList', _id);
+      realm.write(async () => { realm.delete(itemToExclude); });
+      // remove from API
+      const response = await api.delete(`/checkList/${_id}`, {}, { headers: headers });
+      console.log('api response', response.data);
+    } catch (error) {
+      // console.log('[RemoteConnection]', error);
+    }
+  }
 
   // Refresh Control
   const handlePushToRefresh = async () => {
@@ -281,7 +286,7 @@ export const RemoteConnectionProvider = (props) => {
           <Text key={itemData._id}>{`Nome: ${itemData.farmer.name} (${itemData.from.name})`}</Text>
         ))}
       </View>}
-      <RemoteConnectionContext.Provider value={{ remoteListData, handlePushToRefresh }}>
+      <RemoteConnectionContext.Provider value={{ remoteListData, handlePushToRefresh, Delete }}>
         {
           props.children
         }
