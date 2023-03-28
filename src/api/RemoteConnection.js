@@ -1,3 +1,5 @@
+// TODO: componentize!
+
 import React, { useEffect, useState, createContext } from 'react';
 import NetInfo from "@react-native-community/netinfo";
 import { View, Text } from 'react-native';
@@ -27,58 +29,34 @@ export const RemoteConnectionProvider = (props) => {
   // shared remote data list
   const [remoteListData, setRemoteListData] = useState([]);
 
+  // TODO: refactor to joint ites before send to api
   // Sycronize remote API with offline data
   const syncUntrackedData = async () => {
     let simpleCounter = 0;
     const untrackedData = realm.objects('Untracked');
     for (const change of untrackedData) {
+      const realmObject = realm.objectForPrimaryKey('CheckList', change.children)
       try {
         switch (change.operation) {
           case 'create':
-            await api.post('/checkList', {
-              "checklists": [
-                {
-                  "_id": change.data._id,
-                  "type": change.data.type,
-                  "amount_of_milk_produced": change.data.amount_of_milk_produced,
-                  "number_of_cows_head": change.data.number_of_cows_head,
-                  "had_supervision": change.data.had_supervision,
-                  "farmer": {
-                    "name": change.data.farmer.name,
-                    "city": change.data.farmer.city
-                  },
-                  "from": {
-                    "name": change.data.from.name
-                  },
-                  "to": {
-                    "name": change.data.to.name
-                  },
-                  "location": {
-                    "latitude": change.data.location.latitude,
-                    "longitude": change.data.location.longitude
-                  },
-                  "created_at": change.data.created_at,
-                  "updated_at": change.data.updated_at
-                }
-              ]
-            }, { headers: headers });
-            realm.write(() => { realm.delete(change); });
+            await saveToApi(realmObject);
             simpleCounter++;
+            realm.write(() => { realm.delete(change); });
             break;
           // case 'update':
-          //   await axios.put(`${url}/${change.id}`, JSON.parse(change.data));
+          //   await axios.put(`${url}/${change.id}`, JSON.parse(realmObject));
           //   break;
           // case 'delete':
           //   await axios.delete(`${url}/${change.id}`);
           //   break;
           default:
-            console.log(`Operação inválida: ${change.operation}`);
+            // console.log(`Operação inválida: ${change.operation}`);
         }
       } catch (error) {
-        console.log(`Erro ao sincronizar alteração offline: ${error}`);
+        console.log(`[RemoteConnection] Erro ao sincronizar alteração offline: ${error}`);
       }
     }
-    console.log(`[RemoteConnection] UPLOAD ${simpleCounter} itens successfully.`);
+    // console.log(`[RemoteConnection] UPLOAD ${simpleCounter} itens successfully.`);
   };
 
   // Download API Data List
@@ -88,9 +66,9 @@ export const RemoteConnectionProvider = (props) => {
       const response = await api.get('/checkList');
       if (response?.data) fetchedData = response.data;
     } catch (error) {
-      console.log("## ", error)
+      console.log("[RemoteConnection]", error)
     }
-    console.log(`[RemoteConnection] DOWNLOAD ${fetchedData.length} itens successfully.`);
+    // console.log(`[RemoteConnection] DOWNLOAD ${fetchedData.length} itens successfully.`);
     const saving = await saveToRealm(fetchedData);
     setRemoteListData(fetchedData);
   };
@@ -98,34 +76,69 @@ export const RemoteConnectionProvider = (props) => {
   function compareObjects(obj1, obj2) {
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
-  
+
     if (keys1.length !== keys2.length) {
       return false;
     }
-  
+
     for (let i = 0; i < keys1.length; i++) {
       const key = keys1[i];
-  
+
       if (obj1[key] !== obj2[key]) {
-        console.log(obj1[key], obj2[key]);
+        // console.log(obj1[key], obj2[key]);
         return false;
       }
     }
-  
+
     return true;
   }
 
+  // Save data in API
+  async function saveToApi(modelObject) {
+    try {
+      await api.post('/checkList', {
+        "checklists": [
+          {
+            "_id": modelObject._id,
+            "type": modelObject.type,
+            "amount_of_milk_produced": modelObject.amount_of_milk_produced,
+            "number_of_cows_head": modelObject.number_of_cows_head,
+            "had_supervision": modelObject.had_supervision,
+            "farmer": {
+              "name": modelObject.farmer.name,
+              "city": modelObject.farmer.city
+            },
+            "from": {
+              "name": modelObject.from.name
+            },
+            "to": {
+              "name": modelObject.to.name
+            },
+            "location": {
+              "latitude": modelObject.location.latitude,
+              "longitude": modelObject.location.longitude
+            },
+            "created_at": modelObject.created_at,
+            "updated_at": modelObject.updated_at
+          }
+        ]
+      }, { headers: headers });
+    } catch (error) {
+      console.log("[RemoteConnection]", error)
+    }
+  }
+
   // Save API Data List in database
-  async function saveToRealm(propsListData) {
+  async function saveToRealm(remoteListData) {
     let counterSaveSucess = 0;
     let counterEditSucess = 0;
     let counterSkipped = 0;
     realm.write(() => {
-      propsListData.map((jsonRemoteObject) => {
+      remoteListData.map((jsonRemoteObject) => {
 
         const realmObject = realm.objectForPrimaryKey('CheckList', `${jsonRemoteObject._id}`);
         const isNewItemFromRemote = !!!realmObject;
-        
+
         if (isNewItemFromRemote) {
           // create new db register
           const modelCreateCheckListRealmObject = {
@@ -150,45 +163,48 @@ export const RemoteConnectionProvider = (props) => {
             },
             "created_at": jsonRemoteObject.created_at,
             "updated_at": jsonRemoteObject.updated_at,
+            "__v": jsonRemoteObject.__v,
           }
           try {
             realm.create('CheckList', modelCreateCheckListRealmObject);
             counterSaveSucess++;
           } catch (error) {
             counterSkipped++;
-            // console.log(`[RemoteConnection]`, error);
+            console.log(`[RemoteConnection]`, error);
           }
         }
         else {
           // update existing db register
           // TODO: comparar objetos para identificar quem precisa de updtae
-          realmObject.type = jsonRemoteObject.type;
-          realmObject.amount_of_milk_produced = parseInt(jsonRemoteObject.amount_of_milk_produced);
-          realmObject.number_of_cows_head = parseInt(jsonRemoteObject.number_of_cows_head);
-          realmObject.had_supervision = jsonRemoteObject.had_supervision;
-          realmObject.farmer = {
-            name : jsonRemoteObject.farmer.name,
-            city : jsonRemoteObject.farmer.city
+          try {
+            realmObject.type = jsonRemoteObject.type;
+            realmObject.amount_of_milk_produced = parseInt(jsonRemoteObject.amount_of_milk_produced);
+            realmObject.number_of_cows_head = parseInt(jsonRemoteObject.number_of_cows_head);
+            realmObject.had_supervision = jsonRemoteObject.had_supervision;
+            realmObject.farmer = {
+              name: jsonRemoteObject.farmer.name,
+              city: jsonRemoteObject.farmer.city
+            }
+            realmObject.from = {
+              name: jsonRemoteObject.from.name
+            }
+            realmObject.to = {
+              name: jsonRemoteObject.to.name
+            }
+            realmObject.location = {
+              latitude: jsonRemoteObject.location.latitude,
+              longitude: jsonRemoteObject.location.longitude
+            }
+            realmObject.created_at = jsonRemoteObject.created_at;
+            realmObject.updated_at = jsonRemoteObject.updated_at;
+            counterEditSucess++;
+          } catch (error) {
+            console.log(`[RemoteConnection]`, error);
           }
-          realmObject.from = {
-            name : jsonRemoteObject.from.name
-          }
-          realmObject.to = {
-            name : jsonRemoteObject.to.name
-          }
-          realmObject.location = {
-            latitude : jsonRemoteObject.location.latitude,
-            longitude : jsonRemoteObject.location.longitude
-          }
-          realmObject.created_at = jsonRemoteObject.created_at;
-          realmObject.updated_at = jsonRemoteObject.updated_at;
-          counterEditSucess++;
         }
-
-        
       });
     });
-    console.log(`[RemoteConnection] CREATED ${counterSaveSucess} new itens, EDITED ${counterEditSucess} existing successfully and ${counterSkipped} skipped.`);
+    // console.log(`[RemoteConnection] CREATED ${counterSaveSucess} new itens, EDITED ${counterEditSucess} existing successfully and ${counterSkipped} skipped.`);
   }
 
   // Syncronize local database with remote API
@@ -197,7 +213,14 @@ export const RemoteConnectionProvider = (props) => {
     if (!remoteListData.length) return;
 
     const localObjects = realm.objects('CheckList');
-    
+    const untrackedObjects = realm.objects('Untracked');
+
+    // sync remote update first
+    if (untrackedObjects.length > 0) {
+      handlePushToRefresh();
+      return;
+    }
+
     const localIds = localObjects.map((item) => item._id);
     const remoteIds = remoteListData.map((item) => `${item._id}`);
     const diffArray = localIds.filter(item => !remoteIds.includes(item))
@@ -220,7 +243,7 @@ export const RemoteConnectionProvider = (props) => {
       });
     });
 
-    console.log(`[RemoteConnection] REMOVED ${counterSucess} itens successfully and ${counterSkipped} skipped.`);
+    // console.log(`[RemoteConnection] REMOVED ${counterSucess} itens successfully and ${counterSkipped} skipped.`);
   };
 
   // Refresh Control
@@ -229,12 +252,14 @@ export const RemoteConnectionProvider = (props) => {
     await syncRemoteData();
   }
 
-  // only when remoteList update
-  useEffect(() => {
-
-    syncLocalData();
-
-  }, [remoteListData]);
+  // verify when database update
+  realm.addListener('change', async (realm) => {
+    const modelObject = realm.objects('Untracked');
+    if (modelObject.length > 0) {
+      await syncUntrackedData();
+      await syncRemoteData();
+    }
+  });
 
   useEffect(() => {
 
@@ -248,6 +273,13 @@ export const RemoteConnectionProvider = (props) => {
     });
 
   }, []);
+
+  // verify when remoteList update
+  useEffect(() => {
+
+    syncLocalData();
+
+  }, [remoteListData]);
 
   const isDebugMode = !!props?.boolDebugMode && props.boolDebugMode === true;
 

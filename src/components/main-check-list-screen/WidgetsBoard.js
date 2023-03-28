@@ -9,13 +9,13 @@ import { RealmContext } from './../../database/RealmConfig';
 
 const WidgetsBoard = () => {
 
-    const { useRealm, useObject, useQuery } = RealmContext;
+    const { useRealm } = RealmContext;
     const realm = useRealm();
 
     const [amountOfMilkProduced, setAmountOfMilkProduced] = useState(null);
     const [numberOfCowsHead, setNumberOfCowsHead] = useState(null);
-    const [farm, setFarm] = useState(null);
-    const [supervision, setSupervision] = useState(null);
+    const [totalChecklist, setFarm] = useState(null);
+    const [totalUnsynced, setUnsynced] = useState(null);
 
     useEffect(() => {
 
@@ -27,14 +27,15 @@ const WidgetsBoard = () => {
         const quantityCow = results.sum('number_of_cows_head').toLocaleString('pt-BR');
         setNumberOfCowsHead(quantityCow);
 
-        const quantitySupervision = results.filtered('had_supervision == false').length;
-        setSupervision(quantitySupervision);
+        const resultsUnsynced = realm.objects('Untracked');
+        const quantityUnsynced = resultsUnsynced.length.toLocaleString('pt-BR');
+        setUnsynced(quantityUnsynced);
 
-        const resultsFarms = realm.objects('Farmer');
-        const quantityFarm = resultsFarms.length.toLocaleString('pt-BR');
-        setFarm(quantityFarm);
+        const resultsChecklists = realm.objects('CheckList');
+        const quantityChecklist = resultsChecklists.length.toLocaleString('pt-BR');
+        setFarm(quantityChecklist);
 
-    }, [realm.objects('CheckList')]);
+    }, []);
 
     const windowWidth = Dimensions.get('window').width;
     const surfaceWidth = windowWidth / 2.2;
@@ -54,8 +55,8 @@ const WidgetsBoard = () => {
                 <WidgetIndicatorStyled textPrimary={numberOfCowsHead} textSecondary="CABEÇAS DE VACA" />
             </HStackComponent>
             <HStackComponent>
-                <WidgetIndicatorStyled textPrimary={farm} textSecondary="FAZENDAS" />
-                <WidgetIndicatorStyled textPrimary={supervision} textSecondary="SEM SUPERVISÃO" />
+                <WidgetIndicatorStyled textPrimary={totalChecklist} textSecondary="TOTAL DE LISTAS" />
+                <WidgetIndicatorStyled textPrimary={totalUnsynced} textSecondary="NÃO SINCRONIZADO" />
             </HStackComponent>
         </>
     )

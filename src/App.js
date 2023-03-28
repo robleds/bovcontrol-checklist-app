@@ -11,6 +11,8 @@
  * • Ruby 2.7.5
  * • Xcode 14.2
  * • Android Studio 11.0.12
+ * 
+ * More info: README.md
  */
 
 import React, {useEffect} from 'react';

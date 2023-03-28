@@ -18,10 +18,6 @@ const DataListBoard = (props) => {
     const [checklistObjects, setCheckListData] =
         useState(exists ? realm.objects('CheckList').sorted('updated_at', true) : []);
 
-    // TODO: protect system when database isnt launch
-    const [untrackedObjects, setUntrackedData] =
-        useState(exists ? realm.objects('Untracked').sorted('updated_at', true) : []);
-
     const TextComponent = styled(Text)`
     `;
 
@@ -38,18 +34,9 @@ const DataListBoard = (props) => {
         <Stack m={4} spacing={4}>
             <TextComponent variant="h4">
                 {
-                    `Minhas Listas (${untrackedObjects.length+checklistObjects.length})`
+                    `Minhas Listas`
                 }
             </TextComponent>
-            {untrackedObjects.map((item, idx) => (
-                <ListItemComponent
-                    key={idx}
-                    title={`>> ${item.data.from.name} (${item.data.farmer.name})`}
-                    secondaryText={`${moment(item.data.updated_at).fromNow()} em ${moment(item.data.updated_at).format('LLL')}`}
-                    onPress={() =>
-                        props.navigation.navigate('DetailCheckList', { data: JSON.stringify(item.data) })
-                    } />
-            ))}
             {checklistObjects.map((item, idx) => (
                 <ListItemComponent
                     key={idx}
