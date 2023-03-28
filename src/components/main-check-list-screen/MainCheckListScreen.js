@@ -1,13 +1,35 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, RefreshControl } from 'react-native';
 import { Button, Text } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CheckListBoard from './DataListBoard';
 import WidgetsBoard from './WidgetsBoard';
 
+// Database Realm dependencies
+import { RealmContext } from './../../database/RealmConfig';
+
+// Remote Conection
+import { RemoteConnectionContext } from './../../api/RemoteConnection';
+
 const MainCheckListScreen = (props) => {
 
+    const { useRealm, useObject, useQuery } = RealmContext;
+    const realm = useRealm();
+
+    
+    // Refresh control
+    const { handlePushToRefresh } = React.useContext(RemoteConnectionContext);
+    const [refreshing, setRefreshing] = React.useState(false);
+    const onRefresh = React.useCallback(() => {
+      setRefreshing(true);
+      handlePushToRefresh();
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 2000);
+    }, []);
+
     React.useEffect(() => {
+
         props.navigation.setOptions({
             headerRight: () => (
                 <Button
@@ -18,10 +40,18 @@ const MainCheckListScreen = (props) => {
                 />
             ),
         });
+
+        console.log("[MainCheckListScreen: CheckList]", realm.objects('CheckList').length);
+        console.log("[MainCheckListScreen: Untracked]", realm.objects('Untracked').length);
+        console.log("[MainCheckListScreen: Logs]", realm.objects('LogProd').length);
+
     }, []);
 
     return (
-        <ScrollView>
+        <ScrollView
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
             <WidgetsBoard />
             <CheckListBoard {...props} />
         </ScrollView>

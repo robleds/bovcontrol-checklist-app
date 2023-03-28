@@ -6,7 +6,7 @@ export class Untracked extends Realm.Object {
     primaryKey: '_id',
     properties: {
         _id: 'string',
-        type: "string",
+        operation: "string",
         updated_at: "date",
         data: 'CheckList?',
     }

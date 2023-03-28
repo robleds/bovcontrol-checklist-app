@@ -7,11 +7,11 @@ export class CheckList extends Realm.Object {
     properties: {
         _id: 'string',
         type: "string",
-        amount_of_milk_produced: "string", // must to be number
+        amount_of_milk_produced: "int",
         farmer: 'Farmer?',
         from: 'From?',
         to: 'To?',
-        number_of_cows_head: "string", // must to be number
+        number_of_cows_head: "int",
         had_supervision: 'bool',
         location: 'Location?',
         created_at: "date",

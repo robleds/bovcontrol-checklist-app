@@ -1,6 +1,6 @@
 import React from "react";
 import { Dimensions } from 'react-native';
-import { Surface, Text } from "@react-native-material/core";
+import { ActivityIndicator, Surface, Text } from "@react-native-material/core";
 import styled from 'styled-components/native';
 
 const TextPrimaryComponent = styled(Text)`
@@ -22,9 +22,14 @@ const WidgetIndicatorStyled = ({textPrimary, textSecondary}) => {
         height: ${surfaceHeigth}px
     `;
 
+    const ActivityIndicatorComponent = styled(ActivityIndicator)`
+        padding-bottom: 10px;
+    `;
+
     return (
         <SurfaceComponent elevation={1} category="medium">
-            <TextPrimaryComponent>{textPrimary}</TextPrimaryComponent>
+            {!textPrimary && <ActivityIndicatorComponent color="black" />}
+            {textPrimary && <TextPrimaryComponent>{textPrimary}</TextPrimaryComponent>}
             <TextSecodaryComponent>{textSecondary}</TextSecodaryComponent>
         </SurfaceComponent>
     )

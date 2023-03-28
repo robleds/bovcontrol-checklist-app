@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StackActions } from '@react-navigation/native';
-import { Button } from 'react-native';
-import 'react-native-get-random-values'
-import { v4 as uuid } from 'uuid'
+import { View, Text, StyleSheet } from 'react-native';
+import { Button, Surface, HStack, Stack } from '@react-native-material/core';
+import Icon from "react-native-vector-icons/MaterialIcons";
+import styled from 'styled-components/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ActivityIndicatorStyled from './../utils/activity-indicator/ActivityIndicatorStyled'
 
 // Database Realm dependencies
 import { RealmContext } from './../../database/RealmConfig';
@@ -11,77 +14,159 @@ const LaunchSetupScreen = ({ navigation }) => {
 
     const { useRealm, useObject, useQuery } = RealmContext;
     const realm = useRealm();
-    const realmPath = realm.path;
-    const exists = Realm.exists({ path: realmPath });
+
+    // Loading state controller
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Processing state controller
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    // Setup steps controller
+    const [setupStep, setSetupStep] = useState(0);
+
+    // Database creation instance
+    const [hasDatabase, setCreateDatabase] = useState(false);
+
+    // Untracked data controller
+    const [untrackedData, setUntrackedData] = useState([]);
+
+    // Remote data controller
+    const [hasRemoteData, setRemoteData] = useState(false);
+
+    const handleInicialize = () => {
+
+        setIsProcessing(true);
+        setSetupStep(1);
+
+        // TODO: create real validations that allow to check
+        // the health of components and initialize them if necessary
+
+        setTimeout(() => {
+            // check database
+            if (!!realm.path) {
+                setCreateDatabase(true);
+            }
+            // TODO: if not, force create it
+        }, 500);
+
+        setTimeout(async () => {
+            // force start app
+            setSetupStep(3);
+        }, 1500);
+    }
 
     useEffect(() => {
 
-        const unique_id = uuid().toString();
-        const unique_data_id = uuid().toString();
-        const today = new Date().toISOString();
+        if (hasDatabase) {
+            const isFirstStep = setupStep === 1;
+            if (isFirstStep) setSetupStep(2);
+        }
 
-        const objUntrackedModel = {
-            _id: unique_id,
-            type: "create",
-            updated_at: today,
-            data: {
-                _id: unique_data_id,
-                type: "BPA",
-                amount_of_milk_produced: "987", // must to be number
-                farmer: {
-                    "name": "string",
-                    "city": "string"
-                },
-                from: {
-                    "name": "string"
-                },
-                to: {
-                    "name": "string"
-                },
-                number_of_cows_head: "987", // must to be number
-                had_supervision: true,
-                location: {
-                    "latitude": -23.5,
-                    "longitude": -46.6
-                },
-                created_at: today,
-                updated_at: today,
-                __v: 1
-            },
-        };
+        if (setupStep === 3) {
+            setTimeout(async () => {
+                setIsProcessing(false);
+                await AsyncStorage.setItem('@FirstTimeVisit', 'true');
+                navigation.dispatch(
+                    StackActions.replace('MainCheckList')
+                )
+            }, 500);
+        }
 
-        // realm.write(() => {
-        //     realm.create('Untracked', objUntrackedModel);
-        // });
+    }, [setupStep, hasDatabase]);
 
-        // realm.write(() => {
-        //     realm.delete(realm.objects('CheckList')[0]);
-        //     realm.delete(realm.objects('Untracked')[0]);
-        // });
+    useEffect(() => {
 
-        console.log("[LaunchSetupScreen: CheckList]", realm.objects('CheckList').length);
-        console.log("[LaunchSetupScreen: Untracked]", realm.objects('Untracked').length);
-        console.log("[LaunchSetupScreen: Logs]", realm.objects('LogProd').length);
-
-        navigation.dispatch(
-            StackActions.replace('MainCheckList', {
-                status: 'offline',
-            })
-        )
+        AsyncStorage.getItem('@FirstTimeVisit').then((result) => {
+            if (result===null) {
+                setIsLoading(false);
+            }
+            else {
+                navigation.dispatch(
+                    StackActions.replace('MainCheckList')
+                )
+            }
+        });
 
     }, []);
 
+    const Container = styled(Stack)`
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+    `;
+
+    const SliderContainer = styled(View)`
+        align-items: center;
+        margin-vertical: 32px;
+    `;
+
+    const TextTitle = styled(Text)`
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 16px;
+    `;
+
+    const TextDesc = styled(Text)`
+        text-align: center;
+        margin-vertical: 16px;
+    `;
+
+    const SurfaceLogo = styled(Surface)`
+        justify-content: center;
+        text-align: center;
+        width: 200px;
+        height: 200px;
+    `;
+
+    const IconLogo = styled(Text)`
+        font-size: 130px;
+        text-align: center;
+        justify-content: center;
+    `;
+
     return (
-        <Button
-            title="INICIAR"
-            onPress={() =>
-                navigation.dispatch(
-                    StackActions.replace('MainCheckList', {
-                        status: 'offline',
-                    })
-                )
-            }
-        />
+        <Container>
+            {isLoading && <ActivityIndicatorStyled visible />}
+            {!isLoading && <>
+                <TextTitle>Bem-vindo ao Check List!</TextTitle>
+                <SliderContainer>
+                    <SurfaceLogo
+                        elevation={6}
+                        category="medium">
+                            <IconLogo>🐮</IconLogo>
+                    </SurfaceLogo>
+                    {setupStep === 0 && (
+                        <TextDesc>
+                            Para iniciar, clique no botão Iniciar abaixo.
+                        </TextDesc>
+                    )}
+                    {setupStep === 1 && (
+                        <HStack>
+                            <TextDesc>
+                                Processando...
+                            </TextDesc>
+                        </HStack>
+                    )}
+                    {setupStep === 2 && (
+                        <TextDesc>
+                            Bancos de dados criado ✅
+                        </TextDesc>
+                    )}
+                    {setupStep === 3 && (
+                        <TextDesc>
+                            Iniciando aplicativo 🚀
+                        </TextDesc>
+                    )}
+                </SliderContainer>
+                <Button
+                    title="Iniciar"
+                    mode="contained"
+                    loading={isProcessing}
+                    disabled={isProcessing}
+                    onPress={() => handleInicialize()} />
+            </>}
+        </Container>
     );
 };
 
