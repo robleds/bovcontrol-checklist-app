@@ -21,7 +21,7 @@ const Navigation = () => {
     
     useEffect(() => {
 
-        console.log("[Navigation] inicialized");
+        // console.log("[Navigation] inicialized");
 
     }, []);
   

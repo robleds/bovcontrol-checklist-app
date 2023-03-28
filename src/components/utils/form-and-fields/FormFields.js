@@ -5,7 +5,7 @@ import styled from 'styled-components/native';
 
 const FormFields = ({ action, onSubmit, submitButtonLabel, paramData }) => {
 
-    const [id, setId] = useState(action === 'submit' ? false : paramData._id);
+    const [_id, setId] = useState(action === 'submit' ? 0 : paramData._id);
     const [checked, setChecked] = useState(action === 'submit' ? false : paramData.had_supervision);
     const [textType, onChangeType] = useState(action === 'submit' ? "" : paramData.type);
     const [textFarmName, onChangeFarmName] = useState(action === 'submit' ? "" : paramData.farmer.name);
@@ -14,10 +14,12 @@ const FormFields = ({ action, onSubmit, submitButtonLabel, paramData }) => {
     const [textFarmMilk, onChangeFarmMilk] = useState(action === 'submit' ? 0 : paramData.amount_of_milk_produced.toString());
     const [textFarmCows, onChangeFarmCows] = useState(action === 'submit' ? 0 : paramData.number_of_cows_head.toString());
     const [textFarmManegerName, onChangeFarmManegerName] = useState(action === 'submit' ? "" : paramData.to.name);
+    const [textCreatedAt, onChangeCreatedAt] = useState(action === 'submit' ? null : paramData.created_at);
 
     const handleSubmit = () => {
 
         const modelCreateCheckListRealmObject = {
+            "_id": _id,
             "type": textType,
             "amount_of_milk_produced": textFarmMilk,
             "number_of_cows_head": textFarmCows,
@@ -36,7 +38,7 @@ const FormFields = ({ action, onSubmit, submitButtonLabel, paramData }) => {
                 "latitude": Math.random() * ((-27) - (-22) + 1) + (-22), // fake
                 "longitude": Math.random() * ((-47) - (-42) + 1) + (-42) // fake
             },
-            "created_at": new Date(),
+            "created_at": textCreatedAt,
             "updated_at": new Date(),
             "__v": 1
         };
@@ -88,6 +90,10 @@ const FormFields = ({ action, onSubmit, submitButtonLabel, paramData }) => {
 
     const handleChangeFarmManegerName = value => {
         onChangeFarmManegerName(value);
+    }
+
+    const handleChangeCreatedAt = value => {
+        onChangeCreatedAt(value);
     }
 
     const KeyboardAvoidingViewComponent = styled(KeyboardAvoidingView)`

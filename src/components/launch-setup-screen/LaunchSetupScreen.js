@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StackActions } from '@react-navigation/native';
 import { View, Text, StyleSheet } from 'react-native';
 import { Button, Surface, HStack, Stack } from '@react-native-material/core';
@@ -12,7 +12,7 @@ import { RealmContext } from './../../database/RealmConfig';
 
 const LaunchSetupScreen = ({ navigation }) => {
 
-    const { useRealm, useObject, useQuery } = RealmContext;
+    const { useRealm } = RealmContext;
     const realm = useRealm();
 
     // Loading state controller
@@ -26,12 +26,6 @@ const LaunchSetupScreen = ({ navigation }) => {
 
     // Database creation instance
     const [hasDatabase, setCreateDatabase] = useState(false);
-
-    // Untracked data controller
-    const [untrackedData, setUntrackedData] = useState([]);
-
-    // Remote data controller
-    const [hasRemoteData, setRemoteData] = useState(false);
 
     const handleInicialize = () => {
 

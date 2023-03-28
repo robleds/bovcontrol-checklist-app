@@ -34,7 +34,7 @@ const DetailCheckListScreen = ({ navigation, route }) => {
   const { useRealm } = RealmContext;
   const realm = useRealm();
 
-  const { Delete } = React.useContext(RemoteConnectionContext);
+  const { Update, Delete } = React.useContext(RemoteConnectionContext);
 
   // Delete register local 
   async function handleDeleteForm() {
@@ -46,51 +46,8 @@ const DetailCheckListScreen = ({ navigation, route }) => {
 
   // Update register local 
   async function handleEditForm(formBodyData) {
-    const uniqueId1 = Math.floor(Math.random() * 10000000000000);
-    const uniqueId2 = Math.floor(Math.random() * 10000000000000);
-    const dateNow = new Date();
-    // if (formBodyData !== {}) {
-    //   const modelCreateCheckListRealmObject = {
-    //     "_id": `${uniqueId2}`,
-    //     "type": formBodyData.type,
-    //     "amount_of_milk_produced": parseInt(formBodyData.amount_of_milk_produced),
-    //     "number_of_cows_head": parseInt(formBodyData.number_of_cows_head),
-    //     "had_supervision": formBodyData.had_supervision,
-    //     "farmer": {
-    //       "name": formBodyData.farmer.name,
-    //       "city": formBodyData.farmer.city
-    //     },
-    //     "from": {
-    //       "name": formBodyData.from.name
-    //     },
-    //     "to": {
-    //       "name": formBodyData.to.name
-    //     },
-    //     "location": {
-    //       "latitude": -formBodyData.location.latitude,
-    //       "longitude": formBodyData.location.longitude
-    //     },
-    //     "created_at": formBodyData.created_at,
-    //     "updated_at": formBodyData.updated_at,
-    //     "__v": formBodyData.__v
-    //   };
-    //   realm.write(() => {
-    //     const modelCreateUntrackedRealmObject = {
-    //       "_id": `${uniqueId1}`,
-    //       "operation": 'create',
-    //       "updated_at": dateNow,
-    //       "children_id": `${uniqueId2}`,
-    //       "children_data": modelCreateCheckListRealmObject
-    //     }
-    //     try {
-    //       // realm.delete(realm.objects('Untracked')[0]);
-    //       const result2 = realm.create('Untracked', modelCreateUntrackedRealmObject);
-    //     } catch (error) {
-    //       console.log(`[DetailCheckListScreen]`, error);
-    //     }
-    //   });
-    // }
-    // navigation.pop();
+    await Update(formBodyData);
+    navigation.popToTop();
   }
 
   function handleDelete() {

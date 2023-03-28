@@ -44,9 +44,9 @@ const MainCheckListScreen = (props) => {
             ),
         });
 
-        console.log("[MainCheckListScreen: CheckList]", realm.objects('CheckList').length);
-        console.log("[MainCheckListScreen: Untracked]", realm.objects('Untracked').length);
-        console.log("[MainCheckListScreen: Logs]", realm.objects('LogProd').length);
+        // console.log("[MainCheckListScreen: CheckList]", realm.objects('CheckList').length);
+        // console.log("[MainCheckListScreen: Untracked]", realm.objects('Untracked').length);
+        // console.log("[MainCheckListScreen: Logs]", realm.objects('LogProd').length);
 
     }, []);
 

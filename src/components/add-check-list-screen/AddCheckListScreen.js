@@ -17,7 +17,6 @@ const AddCheckListScreen = ({ navigation, route }) => {
     
     const uniqueId1 = Math.floor(Math.random() * 10000000000000);
     const uniqueId2 = Math.floor(Math.random() * 10000000000000);
-    const dateNow = new Date();
 
     if (formBodyData !== {}) {
 
@@ -41,7 +40,7 @@ const AddCheckListScreen = ({ navigation, route }) => {
           "latitude": -formBodyData.location.latitude,
           "longitude": formBodyData.location.longitude
         },
-        "created_at": formBodyData.created_at,
+        "created_at": formBodyData.updated_at,
         "updated_at": formBodyData.updated_at,
         "__v": formBodyData.__v
       };
@@ -51,7 +50,7 @@ const AddCheckListScreen = ({ navigation, route }) => {
         const modelCreateUntrackedRealmObject = {
           "_id": `${uniqueId1}`,
           "operation": 'create',
-          "updated_at": dateNow,
+          "updated_at": formBodyData.updated_at,
           "children_id": `${uniqueId2}`,
           "children_data": modelCreateCheckListRealmObject
         }

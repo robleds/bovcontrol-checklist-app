@@ -122,88 +122,44 @@ export const RemoteConnectionProvider = (props) => {
           }
         ]
       }, { headers: headers });
-      console.log('saveToApi >> _id:', response.data);
     } catch (error) {
-      console.log("[RemoteConnection]", error)
+      console.log(`[RemoteConnection ${modelObject._id}]`, error)
     }
   }
 
   // Save API Data List in database
   async function saveToRealm(remoteListData) {
+
     let counterSaveSucess = 0;
     let counterEditSucess = 0;
     let counterSkipped = 0;
-    realm.write(() => {
-      remoteListData.map((jsonRemoteObject) => {
 
-        const realmObject = realm.objectForPrimaryKey('CheckList', `${jsonRemoteObject._id}`);
-        const isNewItemFromRemote = !!!realmObject;
+    const promises = remoteListData.map(async (jsonRemoteObject) => {
 
-        if (isNewItemFromRemote) {
-          // create new db register
-          const modelCreateCheckListRealmObject = {
-            "_id": `${jsonRemoteObject._id}`,
-            "type": jsonRemoteObject.type,
-            "amount_of_milk_produced": parseInt(jsonRemoteObject.amount_of_milk_produced),
-            "number_of_cows_head": parseInt(jsonRemoteObject.number_of_cows_head),
-            "had_supervision": jsonRemoteObject.had_supervision,
-            "farmer": {
-              "name": jsonRemoteObject.farmer.name,
-              "city": jsonRemoteObject.farmer.city
-            },
-            "from": {
-              "name": jsonRemoteObject.from.name
-            },
-            "to": {
-              "name": jsonRemoteObject.to.name
-            },
-            "location": {
-              "latitude": jsonRemoteObject.location.latitude,
-              "longitude": jsonRemoteObject.location.longitude
-            },
-            "created_at": jsonRemoteObject.created_at,
-            "updated_at": jsonRemoteObject.updated_at,
-            "__v": jsonRemoteObject.__v,
-          }
-          try {
-            realm.create('CheckList', modelCreateCheckListRealmObject);
-            counterSaveSucess++;
-          } catch (error) {
-            counterSkipped++;
-            console.log(`[RemoteConnection]`, error);
-          }
+      const isNewItemFromRemote = !!!realm.objectForPrimaryKey('CheckList', `${jsonRemoteObject._id}`);
+
+      if (isNewItemFromRemote) {
+        try {
+          await Create(jsonRemoteObject);
+          counterSaveSucess++;
+        } catch (error) {
+          counterSkipped++;
         }
-        else {
-          // update existing db register
-          // TODO: comparar objetos para identificar quem precisa de updtae
-          try {
-            realmObject.type = jsonRemoteObject.type;
-            realmObject.amount_of_milk_produced = parseInt(jsonRemoteObject.amount_of_milk_produced);
-            realmObject.number_of_cows_head = parseInt(jsonRemoteObject.number_of_cows_head);
-            realmObject.had_supervision = jsonRemoteObject.had_supervision;
-            realmObject.farmer = {
-              name: jsonRemoteObject.farmer.name,
-              city: jsonRemoteObject.farmer.city
-            }
-            realmObject.from = {
-              name: jsonRemoteObject.from.name
-            }
-            realmObject.to = {
-              name: jsonRemoteObject.to.name
-            }
-            realmObject.location = {
-              latitude: jsonRemoteObject.location.latitude,
-              longitude: jsonRemoteObject.location.longitude
-            }
-            realmObject.created_at = jsonRemoteObject.created_at;
-            realmObject.updated_at = jsonRemoteObject.updated_at;
-            counterEditSucess++;
-          } catch (error) {
-            console.log(`[RemoteConnection]`, error);
-          }
+      }
+      else {
+        try {
+          // TODO: mudar abordagem de atualização 
+          // await Update(jsonRemoteObject);
+          counterEditSucess++;
+        } catch (error) {
+          counterSkipped++;
         }
-      });
+      }
+
     });
+
+    await Promise.all(promises);
+
     console.log(`[RemoteConnection] CREATED ${counterSaveSucess} new itens, EDITED ${counterEditSucess} existing successfully and ${counterSkipped} skipped.`);
   }
 
@@ -237,6 +193,72 @@ export const RemoteConnectionProvider = (props) => {
 
     console.log(`[RemoteConnection] REMOVED ${counterSucess} itens successfully.`);
   };
+
+  const Create = async (obj) => {
+    const modelCreateCheckListRealmObject = {
+      "_id": `${obj._id}`,
+      "type": obj.type,
+      "amount_of_milk_produced": parseInt(obj.amount_of_milk_produced),
+      "number_of_cows_head": parseInt(obj.number_of_cows_head),
+      "had_supervision": obj.had_supervision,
+      "farmer": {
+        "name": obj.farmer.name,
+        "city": obj.farmer.city
+      },
+      "from": {
+        "name": obj.from.name
+      },
+      "to": {
+        "name": obj.to.name
+      },
+      "location": {
+        "latitude": obj.location.latitude,
+        "longitude": obj.location.longitude
+      },
+      "created_at": obj.created_at,
+      "updated_at": obj.updated_at,
+      "__v": obj.__v,
+    }
+    try {
+      realm.write(() => {
+        realm.create('CheckList', modelCreateCheckListRealmObject);
+      });
+    } catch (error) {
+      console.log(`[RemoteConnection ${obj._id}]`, error);
+    }
+  }
+
+  const Update = async (objUpdate) => {
+    // update existing db register
+    // TODO: comparar propriedades para identificar os que precisam de updtae
+    const realmObject = realm.objectForPrimaryKey('CheckList', `${objUpdate._id}`);
+    try {
+      realm.write(() => {
+        realmObject.type = objUpdate.type;
+        realmObject.amount_of_milk_produced = parseInt(objUpdate.amount_of_milk_produced);
+        realmObject.number_of_cows_head = parseInt(objUpdate.number_of_cows_head);
+        realmObject.had_supervision = objUpdate.had_supervision;
+        realmObject.farmer = {
+          name: objUpdate.farmer.name,
+          city: objUpdate.farmer.city
+        }
+        realmObject.from = {
+          name: objUpdate.from.name
+        }
+        realmObject.to = {
+          name: objUpdate.to.name
+        }
+        realmObject.location = {
+          latitude: objUpdate.location.latitude,
+          longitude: objUpdate.location.longitude
+        }
+        realmObject.created_at = objUpdate.created_at;
+        realmObject.updated_at = objUpdate.updated_at;
+      });
+    } catch (error) {
+      console.log(`[RemoteConnection ${_id}]`, error);
+    }
+  }
 
   const Delete = async ({ _id }) => {
     try {
@@ -286,7 +308,7 @@ export const RemoteConnectionProvider = (props) => {
           <Text key={itemData._id}>{`Nome: ${itemData.farmer.name} (${itemData.from.name})`}</Text>
         ))}
       </View>}
-      <RemoteConnectionContext.Provider value={{ remoteListData, handlePushToRefresh, Delete }}>
+      <RemoteConnectionContext.Provider value={{ remoteListData, handlePushToRefresh, Delete, Update }}>
         {
           props.children
         }

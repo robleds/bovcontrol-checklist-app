@@ -45,7 +45,7 @@ const DataListBoard = (props) => {
             </TextComponent>
             {checklistObjects.map((item, idx) => (
                 <ListItemComponent
-                    key={idx}
+                    key={item._id}
                     title={`${item.from.name} (${item.farmer.name})`}
                     secondaryText={`${moment(item.updated_at).fromNow()} em ${moment(item.updated_at).format('LLL')}`}
                     onPress={() =>
