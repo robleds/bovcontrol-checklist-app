@@ -19,6 +19,7 @@ const DataListBoard = (props) => {
         useState(exists ? realm.objects('CheckList').sorted('updated_at', true) : []);
 
     const TextComponent = styled(Text)`
+        padding: 20px
     `;
 
     const ListItemComponent = styled(ListItem)`
